@@ -1,8 +1,5 @@
-import json
-
 from flask import Flask, request, jsonify, render_template
 from sqlalchemy import create_engine, text
-from tkinter.filedialog import askopenfilename
 import pandas as pd
 
 app = Flask(__name__)
@@ -36,10 +33,14 @@ def get_table(name, format):
             var = ({name: [dict(row) for row in result]})
             return jsonify(var)
         elif format.upper() == 'B':
-            result = connection.execute(text('SELECT * FROM'+' '+name))
-            var = ({name: [dict(row) for row in result]})
-            to_json = jsonify(var)
-            return to_json
+            empleados = "'empleado'"
+            nombre = "'nombre'"
+            consulta = ('SELECT json_build_object({},"Compania",'
+                        '{},(select json_agg(row_to_json((select r from( select "Nombre","Email","Fecha de ingreso") '
+                        'r))))) as empresa FROM empleados GROUP by "Compania"').format(nombre,empleados)
+            result = connection.execute(text(consulta))
+            var = ([dict(row) for row in result])
+            return jsonify(var)
 
 
 if __name__ == "__main__":
