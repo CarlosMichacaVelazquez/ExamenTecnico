@@ -4,11 +4,24 @@ services:
   web:
     build: .
     ports:
-      - 5000:5000
+      - 8000:5000
     volumes:
       - .:/app
     environment:
       FLASK_ENV: development
+    links:
+      - postgres:postgres
 
+
+  postgres:
+    image: 'postgres:13.3'
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=my_database
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST=5432
+    ports:
+      - 5432:5432
 
 
