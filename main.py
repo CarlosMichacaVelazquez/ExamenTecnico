@@ -42,6 +42,14 @@ def get_table():
                 json_format_a = jsonify({table_list: [dict(row) for row in result]})
                 return json_format_a
             elif format_json == 'B':
+                result = connection.execute(f"SELECT column_name FROM information_schema.columns WHERE table_schema = "
+                                            f"'public' AND table_name = '{table_list}'")
+                contex = {
+                    'result': result,
+                    'table_list': table_list
+                }
+                return render_template('optionC.html', **contex)
+            elif format_json == 'C':
                 empleados = "'empleado'"
                 nombre = "'nombre'"
                 consulta = (f'SELECT json_build_object({nombre},"Compania",'
@@ -53,16 +61,28 @@ def get_table():
                 return jsonify(var)
 
 
+@app.route('/table_b', methods=['GET', 'POST'])
+def get_table_b():
+    if request.method == 'POST':
+        consult_b = request.values['consulta']
+        table_name = request.values['table_name']
+        with engine.connect() as conn:
+            print(consult_b)
+            result = conn.execute(f'SELECT {consult_b} FROM "{table_name}"')
+            json_format_b = jsonify({table_name: [dict(row) for row in result]})
+        return json_format_b
+
+
 @app.route('/consult_table', methods=['GET'])
 def consult_table():
     with engine.connect() as conn:
         result = conn.execute("SELECT table_name as nombre from information_schema.tables WHERE "
                               "table_schema='public' AND "
                               "table_type='BASE TABLE'")
-        y = []
+        table_list = []
         for row in result:
-            y.append(row['nombre'])
-        return render_template('Consult.html', table_list=y)
+            table_list.append(row['nombre'])
+        return render_template('Consult.html', table_list=table_list)
 
 
 if __name__ == "__main__":
